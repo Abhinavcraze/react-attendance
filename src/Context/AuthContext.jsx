@@ -39,7 +39,7 @@ export function AuthProvider({ children }) {
           localStorage.setItem('loggedInUser', JSON.stringify(result));
           resolve(result);
         } else {
-          reject("Invalid Credentials / Thavarana Password");
+          reject("Invalid Credentials");
         }
       };
       req.onerror = () => reject("Database Error");
