@@ -99,10 +99,14 @@ const AttendanceReport = () => {
         {/* Section 1: Date Range */}
         <section className="report-card">
           <h2>Date Range Report</h2>
+      
           <form onSubmit={handleDateRange} style={{ boxShadow: 'none', padding: 0, width: '100%', maxWidth: '100%' }}>
             <div className="input-group-row">
+              <label>Start Date</label>
               <input name="start" type="date" required />
+              <label>End Date</label>
               <input name="end" type="date" required />
+              <label>Class</label>
               <select name="cls">
                 <option value="all">All Classes</option>
                 {[6,7,8,9,10].map(c => <option key={c} value={c}>Class {c}</option>)}
@@ -134,6 +138,7 @@ const AttendanceReport = () => {
           <h2>Monthly Summary</h2>
           <form onSubmit={handleMonthly} style={{ boxShadow: 'none', padding: 0, width: '100%', maxWidth: '100%' }}>
             <div className="input-group-row">
+              <label>Month of an Attendance</label>
               <input name="month" type="month" required />
               <select name="cls" required>
                 <option value="">Select Class</option>
