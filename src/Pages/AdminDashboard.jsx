@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../Components/Header';
 import { openDB, getAllFromStore, deleteFromStore } from '../Utils/db';
+import { FaTrash } from 'react-icons/fa'; 
 
 const AdminDashboard = () => {
   const [students, setStudents] = useState([]);
@@ -11,7 +12,6 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       const allStudents = await getAllFromStore("students");
-      // Sort by RollNo
       const sorted = allStudents.sort((a, b) => a.RollNo - b.RollNo);
       setStudents(sorted);
       setFilteredStudents(sorted);
@@ -33,21 +33,18 @@ const AdminDashboard = () => {
     setCurrentPage(1);
   };
 
-  // Handle Delete (TC Issue)
   const handleDelete = async (studentId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this student (Issue TC)?");
     if (confirmDelete) {
       try {
         await deleteFromStore("students", studentId);
         
-        // Update local state
         const updatedStudents = students.filter(s => s.StudentId !== studentId);
         const updatedFiltered = filteredStudents.filter(s => s.StudentId !== studentId);
         
         setStudents(updatedStudents);
         setFilteredStudents(updatedFiltered);
 
-        // Adjust pagination if page becomes empty
         if (updatedFiltered.length > 0 && updatedFiltered.length <= (currentPage - 1) * itemsPerPage) {
            setCurrentPage(prev => Math.max(prev - 1, 1));
         }
@@ -58,7 +55,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = filteredStudents.slice(startIndex, startIndex + itemsPerPage);
@@ -94,17 +90,25 @@ const AdminDashboard = () => {
                 <td style={{ textAlign: 'center' }}>
                   <button 
                     onClick={() => handleDelete(s.StudentId)}
+                    title="Issue TC / Delete"
                     style={{ 
-                      backgroundColor: 'transparent', // No bg-color
+                      backgroundColor: 'transparent', 
                       border: 'none', 
                       cursor: 'pointer', 
-                      padding: '0' 
+                      padding: '5px',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      margin: '0 auto'
                     }}
                   >
-                    <img 
-                      src="delete.png" 
-                      alt="DELETE(TC)" 
-                      style={{ width: '20px', height: '20px' }} // Adjusted to 20px for visibility (5px is invisible)
+                    {/* 2. Used the FaTrash Icon here */}
+                    <FaTrash 
+                      size={20} 
+                      color="#d9534f" 
+                      style={{ transition: 'color 0.2s' }}
+                      onMouseOver={(e) => e.currentTarget.style.color = '#c9302c'}
+                      onMouseOut={(e) => e.currentTarget.style.color = '#d9534f'}
                     />
                   </button>
                 </td>
