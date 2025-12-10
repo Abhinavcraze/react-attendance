@@ -170,7 +170,7 @@ const AdminDashboard = () => {
         {/* Pagination Controls */}
         {totalPages > 1 && (
           <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '10px', alignItems: 'center' }}>
-            <button 
+            <button  className="btn"
               disabled={currentPage === 1} 
               onClick={() => setCurrentPage(p => p - 1)}
               style={{ padding: '5px 10px', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
@@ -180,7 +180,7 @@ const AdminDashboard = () => {
             
             <span>Page <strong>{currentPage}</strong> of {totalPages}</span>
             
-            <button 
+            <button className="btn"
               disabled={currentPage === totalPages} 
               onClick={() => setCurrentPage(p => p + 1)}
               style={{ padding: '5px 10px', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}

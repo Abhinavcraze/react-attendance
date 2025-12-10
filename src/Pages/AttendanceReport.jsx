@@ -148,12 +148,12 @@ const AttendanceReport = () => {
         </div>
 
         <div style={{ display: 'flex', paddingBottom: '1px' }}> 
-          <button 
+          <button className="btn"
             type="submit" 
             style={{ 
               padding: '10px 20px', 
               cursor: 'pointer',
-              backgroundColor: '#800080',
+              // backgroundColor: '#800080',
               color: 'white',
               border: 'none',
               borderRadius: '4px'
@@ -245,7 +245,7 @@ const AttendanceReport = () => {
 
             {/* 3. Generate Button Block */}
             <div style={{ display: 'flex', flexDirection: 'column',paddingBottom: '2px' }}> {/* Slight padding to align with input borders */}
-              <button 
+              <button className="btn"
                 type="submit" 
                 style={{ 
                   padding: '10px 20px', 
@@ -338,7 +338,7 @@ const AttendanceReport = () => {
             </div>
 
             <div style={{display: 'flex', flexDirection: 'column' ,paddingBottom: '2px' }}> 
-              <button 
+              <button className="btn"
                 type="submit" 
                 style={{ 
                   padding: '10px 20px', 

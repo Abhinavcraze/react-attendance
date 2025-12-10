@@ -35,7 +35,9 @@ tr:nth-child(even) { background: #f3e5f5; }
 
 /* Dashboard Specific */
 .class-buttons { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-.class-btn { background: linear-gradient(135deg, #29c5ab, #2575fc); color: white; }
+/*.class-btn { background: linear-gradient(135deg, #29c5ab, #2575fc); color: white; }*/
+.class-btn { background: rgb(179, 131, 43) }
+.btn{background : rgb(179, 131, 43)}
 
 /* Attendance Report Specific */
 .report-card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 2rem; }

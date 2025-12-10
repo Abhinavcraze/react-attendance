@@ -130,7 +130,7 @@ const AddStudents = () => {
       width: '100%',
       padding: '14px',
       marginTop: '10px',
-      backgroundColor: '#4f46e5',
+      backgroundColor: '#b98c0e',
       color: 'white',
       border: 'none',
       borderRadius: '8px',
