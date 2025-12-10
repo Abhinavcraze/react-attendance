@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   }, []);
 
   const handleClassFilter = async (classFilter) => {
-    setCurrentPage(1); // Reset page on filter change
+    setCurrentPage(1); 
     if (classFilter === 'all') {
       setFilteredStudents(students);
     } 

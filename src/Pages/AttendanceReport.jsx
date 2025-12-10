@@ -84,7 +84,6 @@ const AttendanceReport = () => {
     index.getAll(IDBKeyRange.only(date)).onsuccess = (ev) => {
       let res = ev.target.result;
       
-      // Sort results by Class, then by Name for better readability
       res.sort((a, b) => a.class - b.class || a.name.localeCompare(b.name));
 
       setReportData(res);
@@ -96,106 +95,293 @@ const AttendanceReport = () => {
     <div className="page-container">
       <Header title="Attendance Reports" />
       <main>
-        {/* Section 1: Date Range */}
+        <section className="report-card" style={{ textAlign: 'left' }}>
+        <h2>Attendance Period Summary</h2>
+        <p style={{ marginBottom: '15px', color: '#666' }}>
+            Analyze attendance for students over a specific date range.
+        </p>
+        <form onSubmit={handleDateRange} style={{ boxShadow: 'none', padding: 0, width: '100%' }}>
+    
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'flex-end', 
+          justifyContent: 'flex-start', 
+          gap: '20px', 
+          flexWrap: 'wrap' 
+        }}>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+            Start Date
+          </label>
+          <input 
+            name="start" 
+            type="date" 
+            required 
+            style={{ width: 'auto', padding: '8px' }} 
+          />
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+            End Date
+          </label>
+          <input 
+            name="end" 
+            type="date" 
+            required 
+            style={{ width: 'auto', padding: '8px' }} 
+          />
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+          <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+            Class
+          </label>
+          <select 
+            name="cls" 
+            style={{ width: 'auto', padding: '9px', minWidth: '120px' }} 
+          >
+            <option value="all">All Classes</option>
+            {[6, 7, 8, 9, 10].map(c => <option key={c} value={c}>Class {c}</option>)}
+          </select>
+        </div>
+
+        <div style={{ display: 'flex', paddingBottom: '1px' }}> 
+          <button 
+            type="submit" 
+            style={{ 
+              padding: '10px 20px', 
+              cursor: 'pointer',
+              backgroundColor: '#800080',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px'
+            }}
+          >
+            Generate
+          </button>
+        </div>
+
+      </div>
+    </form>
+
+    {reportType === 'range' && reportData && (
+      <div style={{ marginTop: '20px' }}>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reportData.length === 0 ? (
+              <tr><td colSpan="4" style={{ textAlign: 'center' }}>No records found.</td></tr>
+            ) : (
+              reportData.map((r, i) => (
+                <tr key={i}>
+                  <td>{r.date}</td>
+                  <td>{r.name}</td>
+                  <td>{r.class}</td>
+                  <td className={r.status.toLowerCase()}>{r.status}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+
+
+
+        {/* Section 2: Monthly Summary */}
         <section className="report-card">
-          <h2>Date Range Report</h2>
-      
-          <form onSubmit={handleDateRange} style={{ boxShadow: 'none', padding: 0, width: '100%', maxWidth: '100%' }}>
-            <div className="input-group-row">
-              <label>Start Date</label>
-              <input name="start" type="date" required />
-              <label>End Date</label>
-              <input name="end" type="date" required />
-              <label>Class</label>
-              <select name="cls">
-                <option value="all">All Classes</option>
-                {[6,7,8,9,10].map(c => <option key={c} value={c}>Class {c}</option>)}
-              </select>
-              <button type="submit">Generate</button>
+        <h2>Monthly Summary</h2>
+        <p style={{ marginBottom: '15px', color: '#666' }}>
+          Analyze attendance for students on a monthly basis.
+        </p>
+        
+        <form onSubmit={handleMonthly} style={{ boxShadow: 'none', padding: 0, width: '100%' }}>
+          
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'flex-end',  
+            justifyContent: 'flex-start',
+            gap: '20px',            
+            flexWrap: 'wrap'         
+          }}>
+
+            {/* 1. Month Input Block */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                Month of Attendance
+              </label>
+              <input 
+                name="month" 
+                type="month" 
+                required 
+                style={{ width: 'auto', padding: '8px' }} // "auto" makes it compact
+              />
             </div>
-          </form>
-          {reportType === 'range' && reportData && (
+
+            {/* 2. Class Selection Block */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                Class
+              </label>
+              <select 
+                name="cls" 
+                required 
+                style={{ width: 'auto', padding: '9px', minWidth: '150px' }} // Adjusted padding and min-width
+              >
+                <option value="">Select Class</option>
+                {[6, 7, 8, 9, 10].map(c => <option key={c} value={c}>Class {c}</option>)}
+              </select>
+            </div>
+
+            {/* 3. Generate Button Block */}
+            <div style={{ display: 'flex', flexDirection: 'column',paddingBottom: '2px' }}> {/* Slight padding to align with input borders */}
+              <button 
+                type="submit" 
+                style={{ 
+                  padding: '10px 20px', 
+                  height: '100%', 
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap' 
+                }}
+              >
+                Generate Summary
+              </button>
+            </div>
+
+          </div>
+        </form>
+
+        {reportType === 'month' && reportData && (
+          <div style={{ marginTop: '20px' }}>
             <table>
-              <thead><tr><th>Date</th><th>Name</th><th>Class</th><th>Status</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Name</th>
+                  <th>Total Days</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                  <th>%</th>
+                </tr>
+              </thead>
               <tbody>
                 {reportData.length === 0 ? (
-                  <tr><td colSpan="4">No records found.</td></tr>
+                  <tr><td colSpan="6" style={{ textAlign: 'center' }}>No students found for this class.</td></tr>
                 ) : (
-                  reportData.map((r, i) => (
-                    <tr key={i}>
-                      <td>{r.date}</td><td>{r.name}</td><td>{r.class}</td>
-                      <td className={r.status.toLowerCase()}>{r.status}</td>
+                  reportData.map((s) => (
+                    <tr key={s.StudentId}>
+                      <td>{s.RollNo}</td>
+                      <td>{s.Name}</td>
+                      <td>{s.total}</td>
+                      <td className="present" style={{ color: 'green' }}>{s.present}</td>
+                      <td className="absent" style={{ color: 'red' }}>{s.absent}</td>
+                      <td><strong>{s.pct}%</strong></td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
-          )}
-        </section>
-
-        {/* Section 2: Monthly Summary */}
-        <section className="report-card">
-          <h2>Monthly Summary</h2>
-          <form onSubmit={handleMonthly} style={{ boxShadow: 'none', padding: 0, width: '100%', maxWidth: '100%' }}>
-            <div className="input-group-row">
-              <label>Month of an Attendance</label>
-              <input name="month" type="month" required />
-              <select name="cls" required>
-                <option value="">Select Class</option>
-                {[6,7,8,9,10].map(c => <option key={c} value={c}>Class {c}</option>)}
-              </select>
-              <button type="submit">Generate Summary</button>
-            </div>
-          </form>
-          {reportType === 'month' && reportData && (
-            <table>
-              <thead><tr><th>Roll No</th><th>Name</th><th>Total Days</th><th>Present</th><th>Absent</th><th>%</th></tr></thead>
-              <tbody>
-                {reportData.length === 0 ? (
-                    <tr><td colSpan="6">No students found for this class.</td></tr>
-                ) : (
-                    reportData.map((s) => (
-                      <tr key={s.StudentId}>
-                        <td>{s.RollNo}</td><td>{s.Name}</td><td>{s.total}</td>
-                        <td className="present">{s.present}</td><td className="absent">{s.absent}</td>
-                        <td><strong>{s.pct}%</strong></td>
-                      </tr>
-                    ))
-                )}
-              </tbody>
-            </table>
-          )}
-        </section>
+          </div>
+        )}
+      </section>
 
         {/* Section 3: Report by Date (Added) */}
         <section className="report-card">
-          <h2>Report by Date</h2>
-          <p style={{marginBottom: '10px', color: '#666'}}>Analyze attendance for all students for a specific day.</p>
-          <form onSubmit={handleByDate} style={{ boxShadow: 'none', padding: 0, width: '100%', maxWidth: '100%' }}>
-            <div className="input-group-row">
-              <input name="date" type="date" required />
-              <button type="submit">View Attendance</button>
+        <h2>Report by Date</h2>
+        <p style={{ marginBottom: '15px', color: '#666' }}>
+          Analyze attendance for students on a specific day.
+        </p>
+
+        <form onSubmit={handleByDate} style={{ boxShadow: 'none', padding: 0, width: '100%' }}>
+          
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'flex-end',    
+            justifyContent: 'flex-start', 
+            gap: '20px',               
+            flexWrap: 'wrap'          
+          }}>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                Select Date
+              </label>
+              <input 
+                name="date" 
+                type="date" 
+                required 
+                style={{ width: 'auto', padding: '8px' }} 
+              />
             </div>
-          </form>
-          {reportType === 'date' && reportData && (
-             <table>
-              <thead><tr><th>Name</th><th>Class</th><th>Status</th></tr></thead>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <label style={{ marginBottom: '5px', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                Class
+              </label>
+              <select 
+                name="cls" 
+                style={{ width: 'auto', padding: '9px', minWidth: '130px' }}
+              >
+                <option value="all">All Classes</option>
+                {[6, 7, 8, 9, 10].map(c => <option key={c} value={c}>Class {c}</option>)}
+              </select>
+            </div>
+
+            <div style={{display: 'flex', flexDirection: 'column' ,paddingBottom: '2px' }}> 
+              <button 
+                type="submit" 
+                style={{ 
+                  padding: '10px 20px', 
+                  height: '100%',
+                  cursor: 'pointer'
+                }}
+              >
+                View Attendance
+              </button>
+            </div>
+
+          </div>
+        </form>
+
+        {reportType === 'date' && reportData && (
+          <div style={{ marginTop: '20px' }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Class</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
               <tbody>
                 {reportData.length === 0 ? (
-                  <tr><td colSpan="3">No attendance records found for this date.</td></tr>
+                  <tr><td colSpan="3" style={{ textAlign: 'center' }}>No attendance records found for this date.</td></tr>
                 ) : (
                   reportData.map((r, i) => (
                     <tr key={i}>
                       <td>{r.name}</td>
                       <td>{r.class}</td>
-                      <td className={r.status.toLowerCase()}>{r.status}</td>
+                      <td className={r.status.toLowerCase()} style={{ fontWeight: 'bold' }}>
+                        {r.status}
+                      </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
-          )}
-        </section>
+          </div>
+        )}
+      </section>
 
       </main>
       <footer>&copy; 2025 Soruban Vidhyalaya</footer>

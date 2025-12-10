@@ -85,7 +85,7 @@ const styles = {
     gap: '15px',
   },
   icon: {
-    color: 'black',
+    color : 'gold',
   },
   schoolName: {
     margin: 0,
