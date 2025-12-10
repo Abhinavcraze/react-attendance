@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Header from '../Components/Header';
 import { openDB, getAllFromStore, deleteFromStore } from '../Utils/db';
-import { FaTrash, FaSort, FaSortUp, FaSortDown, FaSearch, FaFilter } from 'react-icons/fa'; 
+import { FaTrash, FaSort, FaSortUp, FaSortDown, FaSearch, FaFilter, FaFileCsv, FaPrint } from 'react-icons/fa'; 
 
 const AdminDashboard = () => {
   const [allStudents, setAllStudents] = useState([]); 
@@ -43,6 +43,7 @@ const AdminDashboard = () => {
     }
   };
 
+  // --- Logic: Search & Sort Pipeline ---
   const processedData = useMemo(() => {
     let data = [...classFilteredStudents];
     if (searchText) {
@@ -70,19 +71,18 @@ const AdminDashboard = () => {
   }, [classFilteredStudents, searchText, searchCol, sortConfig]);
 
   useEffect(() => {
-    //setCurrentPage(1);
+    setCurrentPage(1);
   }, [searchText, itemsPerPage, classFilteredStudents]);
 
   const totalPages = Math.ceil(processedData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentData = processedData.slice(startIndex, startIndex + itemsPerPage);
 
+  // --- Handlers ---
   const handleSort = (key) => {
     let direction = 'asc';
-    setCurrentPage(1); 
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
-      setCurrentPage(1); 
     }
     setSortConfig({ key, direction });
   };
@@ -109,20 +109,65 @@ const AdminDashboard = () => {
     return sortConfig.direction === 'asc' ? <FaSortUp color="#333" size={12} /> : <FaSortDown color="#333" size={12} />;
   };
 
+  // --- NEW: Export Function ---
+  const handleExport = () => {
+    if (processedData.length === 0) {
+      alert("No data to export");
+      return;
+    }
+    // Define Headers
+    const headers = ["ID", "Name", "Class", "Roll No"];
+    
+    // Map data to CSV format
+    const csvContent = [
+      headers.join(","), 
+      ...processedData.map(row => 
+        `${row.StudentId},"${row.Name}",${row.Class},${row.RollNo}`
+      )
+    ].join("\n");
+
+    // Trigger Download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "students_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // --- NEW: Print Function ---
+  const handlePrint = () => {
+    window.print();
+  };
+
   const thStyle = { cursor: 'pointer', userSelect: 'none', position: 'relative', paddingRight: '20px' };
 
   return (
     <div className="page-container">
+      <style>{`
+        @media print {
+          .no-print, header, footer, .class-buttons { display: none !important; }
+          .page-container { margin: 0; padding: 0; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid black; padding: 8px; }
+          th:last-child, td:last-child { display: none; } /* Hide Action Column */
+        }
+      `}</style>
+
       <Header title="Admin Dashboard" />
       <main>
-        <div className="class-buttons" style={{ marginBottom: '15px' }}>
+        {/* Class Filter Buttons */}
+        <div className="class-buttons no-print" style={{ marginBottom: '15px' }}>
           {[6, 7, 8, 9, 10].map(c => (
             <button key={c} className="class-btn" onClick={() => handleClassFilter(c)}>Class {c}</button>
           ))}
           <button className="class-btn" onClick={() => handleClassFilter('all')}>View All</button>
         </div>
 
-        <div style={{ 
+        {/* Filter & Search Bar */}
+        <div className="no-print" style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
@@ -134,7 +179,7 @@ const AdminDashboard = () => {
           flexWrap: 'wrap', 
           gap: '15px'
         }}>
-          
+          {/* Left: Filter */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#555' }}>
               <FaFilter />
@@ -143,13 +188,7 @@ const AdminDashboard = () => {
             <select 
               value={searchCol} 
               onChange={(e) => setSearchCol(e.target.value)}
-              style={{ 
-                padding: '6px 10px', 
-                borderRadius: '4px', 
-                border: '1px solid #ccc', 
-                cursor: 'pointer',
-                backgroundColor: 'white'
-              }}
+              style={{ padding: '6px 10px', borderRadius: '4px', border: '1px solid #ccc', cursor: 'pointer', backgroundColor: 'white' }}
             >
               <option value="Name">Name</option>
               <option value="StudentId">ID</option>
@@ -158,25 +197,47 @@ const AdminDashboard = () => {
             </select>
           </div>
 
+          {/* Right: Search */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexGrow: 1, justifyContent: 'flex-end' }}>
-             <FaSearch color="#888" />
-             <input 
-               type="text" 
-               placeholder={`Search by ${searchCol}...`} 
-               value={searchText}
-               onChange={(e) => setSearchText(e.target.value)}
-               style={{ 
-                 padding: '7px', 
-                 borderRadius: '4px', 
-                 border: '1px solid #ccc', 
-                 width: '100%', 
-                 maxWidth: '250px' 
-               }}
+            <FaSearch color="#888" />
+            <input 
+              type="text" 
+              placeholder={`Search by ${searchCol}...`} 
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              style={{ padding: '7px', borderRadius: '4px', border: '1px solid #ccc', width: '100%', maxWidth: '250px' }}
              />
           </div>
-
         </div>
 
+        {/* --- NEW SECTION: Export & Print Buttons --- */}
+        <div className="no-print" style={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end', // Aligns buttons to the right
+          gap: '10px', 
+          marginBottom: '10px' 
+        }}>
+          <button 
+            onClick={handleExport}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '5px',
+              backgroundColor: '#27ae60', color: 'white', border: 'none', 
+              padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold'
+            }}
+          >
+            <FaFileCsv /> Export CSV
+          </button>
+          <button 
+            onClick={handlePrint}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '5px',
+              backgroundColor: '#2980b9', color: 'white', border: 'none', 
+              padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold'
+            }}
+          >
+            <FaPrint /> Print
+          </button>
+        </div>
         <table>
           <thead>
             <tr>
@@ -205,6 +266,7 @@ const AdminDashboard = () => {
                   <td>{s.RollNo}</td>
                   <td style={{ textAlign: 'center' }}>
                     <button 
+                      className="no-print" // Hide delete button when printing
                       onClick={() => handleDelete(s.StudentId)}
                       title="Issue TC / Delete"
                       style={{ 
@@ -228,7 +290,8 @@ const AdminDashboard = () => {
           </tbody>
         </table>
 
-        <div style={{ 
+        {/* Pagination Footer */}
+        <div className="no-print" style={{ 
           marginTop: '20px', 
           display: 'flex', 
           justifyContent: 'space-between', 
