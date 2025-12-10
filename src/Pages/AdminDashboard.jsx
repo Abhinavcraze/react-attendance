@@ -43,7 +43,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // --- Logic: Search & Sort Pipeline ---
   const processedData = useMemo(() => {
     let data = [...classFilteredStudents];
     if (searchText) {
@@ -71,7 +70,7 @@ const AdminDashboard = () => {
   }, [classFilteredStudents, searchText, searchCol, sortConfig]);
 
   useEffect(() => {
-    setCurrentPage(1);
+    //setCurrentPage(1);
   }, [searchText, itemsPerPage, classFilteredStudents]);
 
   const totalPages = Math.ceil(processedData.length / itemsPerPage);
