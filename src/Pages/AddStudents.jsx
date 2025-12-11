@@ -4,21 +4,45 @@ import { openDB } from '../Utils/db';
 
 const AddStudents = () => {
   const [formData, setFormData] = useState({ name: '', classVal: '', rollNo: '' });
+  const [errors, setErrors] = useState({}); // New state for field errors
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    
+    if (errors[e.target.name]) {
+      setErrors({ ...errors, [e.target.name]: '' });
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    
+    setErrors({});
+
     const { name, classVal, rollNo } = formData;
+
+    let validationErrors = {};
+
+    if (name.trim().length < 6) {
+      validationErrors.name = "Full Name must be at least 6 characters long.";
+    } 
+    else if (!/^[A-Za-z\s]+$/.test(name)) {
+      validationErrors.name = "Full Name must contain only alphabets and spaces.";
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setIsSubmitting(false);
+      return;
+    }
     const cVal = parseInt(classVal);
     const rNo = parseInt(rollNo);
 
     try {
       const db = await openDB();
       
-      // Check Duplicate
       const txCheck = db.transaction("students", "readonly");
       const index = txCheck.objectStore("students").index("ClassAndRollNo");
       
@@ -27,11 +51,9 @@ const AddStudents = () => {
           alert(`Error: Roll No ${rNo} already exists in Class ${cVal}`);
           setIsSubmitting(false);
         } else {
-          // Add Student
           const txAdd = db.transaction("students", "readwrite");
           const store = txAdd.objectStore("students");
           
-          // Get Max ID
           store.openCursor(null, 'prev').onsuccess = (cursorEvent) => {
             const cursor = cursorEvent.target.result;
             const newId = cursor ? cursor.value.StudentId + 1 : 1;
@@ -40,6 +62,7 @@ const AddStudents = () => {
             
             alert(`Student ${name} successfully added!`);
             setFormData({ name: '', classVal: '', rollNo: '' });
+            setErrors({}); 
             setIsSubmitting(false);
           };
         }
@@ -51,7 +74,6 @@ const AddStudents = () => {
     }
   };
 
-  // --- Styles ---
   const styles = {
     pageContainer: {
       backgroundColor: '#f3f4f6',
@@ -111,7 +133,7 @@ const AddStudents = () => {
       backgroundColor: '#f9fafb',
       outline: 'none',
       transition: 'all 0.2s',
-      boxSizing: 'border-box', // Ensures padding doesn't break width
+      boxSizing: 'border-box',
     },
     select: {
       width: '100%',
@@ -120,7 +142,7 @@ const AddStudents = () => {
       borderRadius: '8px',
       border: '1px solid #d1d5db',
       backgroundColor: '#f9fafb',
-      appearance: 'none', // Remove default arrow
+      appearance: 'none',
       backgroundImage: `url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e")`,
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'right 1rem center',
@@ -145,6 +167,13 @@ const AddStudents = () => {
       padding: '20px',
       color: '#9ca3af',
       fontSize: '0.85rem',
+    },
+    // New style for error text
+    errorText: {
+      color: '#ef4444',
+      fontSize: '0.85rem',
+      marginTop: '6px',
+      display: 'block'
     }
   };
 
@@ -155,7 +184,6 @@ const AddStudents = () => {
       <main style={styles.mainContent}>
         <div style={styles.card}>
           <div style={styles.headerSection}>
-            {/* Simple Icon */}
             <div style={{ 
               width:'50px', height:'50px', background:'#e0e7ff', borderRadius:'50%', 
               margin:'0 auto 15px', display:'flex', alignItems:'center', justifyContent:'center', color:'#4f46e5' 
@@ -178,10 +206,16 @@ const AddStudents = () => {
                 name="name" 
                 value={formData.name} 
                 onChange={handleChange} 
-                style={styles.input} 
+                style={{
+                  ...styles.input, 
+                  // Change border color if error exists
+                  borderColor: errors.name ? '#ef4444' : '#d1d5db' 
+                }} 
                 placeholder="Ex. Arun Kumar"
                 required 
               />
+              {/* Display Error Message Here */}
+              {errors.name && <span style={styles.errorText}>{errors.name}</span>}
             </div>
             
             <div style={styles.row}>
